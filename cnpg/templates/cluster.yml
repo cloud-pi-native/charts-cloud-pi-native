@@ -1,0 +1,75 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Values.cnpg.name }}
+spec:
+  instances: {{ .Values.cnpg.instancesNumber}}
+  startDelay: {{ .Values.cnpg.startDelay }}
+  stopDelay: {{ .Values.cnpg.stopDelay }}
+  primaryUpdateStrategy: {{ .Values.cnpg.primaryUpdateStrategy }}
+
+  postgresql:
+    parameters:
+      shared_buffers: 256MB
+      pg_stat_statements.max: '10000'
+      pg_stat_statements.track: all
+      auto_explain.log_min_duration: '10s'
+   {{- if .Values.cnpg.custom_pg_hba.enabled }}
+    pg_hba:
+    {{- range .Values.cnpg.custom_pg_hba.pg_hba }}
+     {{ . }}
+    {{- end }}        
+   {{- end }}
+  superuserSecret:
+    name: {{ .Values.cnpg.name}}-superuser-secret
+  bootstrap:
+  {{- if not .Values.cnpg.recovery.enabled }}
+    initdb:
+      database: {{ .Values.cnpg.initdb.database.name}}
+      owner: {{ .Values.cnpg.app.username }}
+      secret:
+        name: {{ .Values.cnpg.name}}-app-secret     
+  {{- end }}
+  {{- if .Values.cnpg.recovery.enabled }}
+    recovery:
+     backup:
+       name: cluster-recovery
+  {{- end }}
+  {{- if .Values.cnpg.backup.enabled}}
+  backup:
+    barmanObjectStore:
+      destinationPath: {{ .Values.cnpg.backup.s3Path }}
+      endpointURL: {{ .Values.cnpg.backup.s3Endpoint }}
+      s3Credentials:
+        accessKeyId:
+          name: {{ .Values.cnpg.backup.s3Secret.name }}
+          key: {{ .Values.cnpg.backup.s3Secret.ak_key }}
+        secretAccessKey:
+          name: {{ .Values.cnpg.backup.s3Secret.name }}
+          key: {{ .Values.cnpg.backup.s3Secret.sk_key }}
+      wal:
+        compression: gzip
+        encryption: AES256
+      data:
+        compression: gzip
+        encryption: AES256
+        immediateCheckpoint: false
+        jobs: 2
+    retentionPolicy: {{ .Values.cnpg.backup.retentionPolicy }}
+  {{- end }}
+  {{- if .Values.cnpg.recovery.enabled }}            
+  externalClusters:
+    - name: cluster-recovery
+      barmanObjectStore:
+        destinationPath: {{ .Values.cnpg.recovery.s3Path }}
+        endpointURL: {{ .Values.cnpg.recovery.s3Endpoint }}
+        s3Credentials:
+          accessKeyId:
+            name: {{ .Values.cnpg.recovery.s3Secret.name }}
+            key: {{ .Values.cnpg.recovery.s3Secret.name }}
+          secretAccessKey:
+            name: {{ .Values.cnpg.recovery.s3Secret.name }}
+            key: {{ .Values.cnpg.recovery.s3Secret.sk_key }}
+  {{- end }}
+  storage:
+    size: {{ .Values.cnpg.storage.size }}

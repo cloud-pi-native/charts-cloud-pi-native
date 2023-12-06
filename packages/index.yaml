@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  cnpg-helm:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2023-05-12T18:18:01.394722+02:00"
+    description: A Helm chart for Kubernetes
+    digest: 1df0beec2f675722c34f1662f5ebe35707c73dad112d95f4725497528ce4bd70
+    name: cnpg-helm
+    type: application
+    urls:
+    - rg.fr-par.scw.cloud/forge-mi-dso-helm-charts-scaleway/cnpg-helm-0.1.0.tgz
+    version: 0.1.0
+generated: "2023-05-12T18:18:01.394017+02:00"
