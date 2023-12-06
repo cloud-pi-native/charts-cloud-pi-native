@@ -31,7 +31,7 @@ cnpg:
     size: 1Gi    
   backup:
     enabled: true
-    s3Path: s3://zk-helm-81afeecd-332e-4957-b59c-86f40619a167
+    s3Path: s3://zk-helm-81afeecd-33
     s3Endpoint: http://s3.openshift-storage.svc
     s3Secret:
       name: zk-helm
@@ -40,7 +40,7 @@ cnpg:
     retentionPolicy: "30d"
   recovery:
     enabled: false
-    s3Path: s3://zk-backup-pg-1c374199-1a63-41ac-aadd-7d43005a7670
+    s3Path: s3://zk-backup-pg-1c374199-1a63
     s3Endpoint: http://s3.openshift-storage.svc
     s3Secret:
       name: toto
